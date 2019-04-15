@@ -1,17 +1,15 @@
 package com.svc.air
 
-import com.android.build.api.transform.Format
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.api.transform.Transform
-import com.android.build.api.transform.TransformException
-import com.android.build.api.transform.TransformInvocation
+import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.google.common.collect.ImmutableSet
 
-import java.util.jar.JarEntry
+import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 
 class AirTransform extends Transform {
+    private static final ROUTE_PREFIX = "route/module/Route_"
+
     private boolean isApp
 
     AirTransform(boolean isApp) {
@@ -56,12 +54,19 @@ class AirTransform extends Transform {
         String dir = outDir.toString();
         println("routePath :" + outDir)
 
+        Set<String> initClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
         transformInvocation.inputs.each {
             it.directoryInputs.each { input ->
+                println("directoryInputs:__" + input.name)
                 int length = input.file.toString().length()
                 input.file.traverse { file ->
                     String className = file.toString().substring(length);
-                    println("directoryInputs" + className)
+                    println("directoryInputs:__" + className)
+                    if (isTargetClass(className)) {
+                        initClasses.add(className)
+                    }
+
 //                    if (it.isDirectory()) {
 ////                        println "directory: " + dir + className
 //                        new File(dir + className).mkdirs();
@@ -75,13 +80,25 @@ class AirTransform extends Transform {
                 JarFile jarFile = new JarFile(input.file)
                 println("jarFile :" + input.file)
                 jarFile.entries().each { entry ->
-                    println ("jarInputs" + entry.getName())
+//                    println ("jarInputs:__" + entry.getName())
+                    String className = entry.getName()
+                    if (isTargetClass(className)) {
+                        initClasses.add(className)
+                    }
                 }
+            }
+
+            initClasses.each {
+                println("initClasses: " + it)
             }
         }
     }
 
     private void generateRegister() {
 
+    }
+
+    private boolean isTargetClass(String className) {
+        return className.startsWith(ROUTE_PREFIX) && className.endsWith(".class")
     }
 }

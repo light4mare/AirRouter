@@ -43,7 +43,7 @@ class RouterProcessor : BaseProcessor() {
             .addModifiers(PUBLIC, FINAL)
 
         val funInitSpec = MethodSpec.methodBuilder("init").addModifiers(PUBLIC, STATIC)
-        val  serviceLoaderClass = className(SERVICE_LOADER_CLASS)
+        val serviceLoaderClass = className(SERVICE_LOADER_CLASS)
 //        val  serviceLoaderClass = ClassName.get("router.api", "ServiceLoader")
         val routeClass = className(ROUTE_INFO_CLASS)
 
