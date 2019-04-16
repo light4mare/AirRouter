@@ -3,6 +3,8 @@ package com.svc.air
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.google.common.collect.ImmutableSet
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.io.FileUtils
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.MethodVisitor
@@ -33,12 +35,12 @@ class AirTransform extends Transform {
 
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
-//        return TransformManager.SCOPE_FULL_PROJECT
-        if (isApp) {
-            return TransformManager.SCOPE_FULL_PROJECT
-        } else {
-            return ImmutableSet.of(QualifiedContent.Scope.PROJECT)
-        }
+        return TransformManager.SCOPE_FULL_PROJECT
+//        if (isApp) {
+//            return TransformManager.SCOPE_FULL_PROJECT
+//        } else {
+//            return ImmutableSet.of(QualifiedContent.Scope.PROJECT)
+//        }
     }
 
     @Override
@@ -48,33 +50,43 @@ class AirTransform extends Transform {
 
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-        super.transform(transformInvocation)
+//        super.transform(transformInvocation)
         println "----------------2333333333333333 AirTransform begin----------------"
 
-        def outDir = transformInvocation.outputProvider.getContentLocation("route", outputTypes, scopes, Format.DIRECTORY)
-        outDir.deleteDir()
-        outDir.mkdirs()
+//        def outDir = transformInvocation.outputProvider.getContentLocation("route", TransformManager.CONTENT_CLASS, ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY)
+//        outDir.deleteDir()
+//        outDir.mkdirs()
 
-        String dir = outDir.toString();
-        println("routePath :" + outDir)
+        File dest = transformInvocation.getOutputProvider().getContentLocation(
+                "routePath", TransformManager.CONTENT_CLASS,
+                ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY);
+//        println("WMRouter :" + dest)
+
+//        String dir = outDir.toString();
+        String dir = dest.toString();
+//        println("routePath :" + outDir)
 
         Set<String> initClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         transformInvocation.inputs.each {
-            it.directoryInputs.each { input ->
+            it.directoryInputs.each { directoryInput ->
 //                println("directoryInputs:__" + input.name)
-                int length = input.file.toString().length()
-                input.file.traverse { file ->
+                int length = directoryInput.file.toString().length()
+                directoryInput.file.traverse { file ->
                     String className = file.toString().substring(length + 1).replace("\\", ".")
 //                    println("directoryInputs:__" + className)
                     if (isTargetClass(className)) {
                         initClasses.add(className)
                     }
                 }
+                File dst = transformInvocation.getOutputProvider().getContentLocation(
+                        directoryInput.getName(), directoryInput.getContentTypes(),
+                        directoryInput.getScopes(), Format.DIRECTORY);
+                FileUtils.copyDirectory(directoryInput.file, dst);
             }
 
-            it.jarInputs.each { input ->
-                JarFile jarFile = new JarFile(input.file)
+            it.jarInputs.each { jarInput ->
+                JarFile jarFile = new JarFile(jarInput.file)
 //                println("jarFile :" + input.file)
                 jarFile.entries().each { entry ->
 //                    println ("jarInputs:__" + entry.getName())
@@ -83,6 +95,10 @@ class AirTransform extends Transform {
                         initClasses.add(className)
                     }
                 }
+                File dst = transformInvocation.getOutputProvider().getContentLocation(
+                        jarInput.getName(), jarInput.getContentTypes(), jarInput.getScopes(),
+                        Format.JAR);
+                FileUtils.copyFile(jarInput.file, dst)
             }
 
         }
@@ -92,7 +108,11 @@ class AirTransform extends Transform {
         println "----------------2333333333333333 AirTransform finish----------------"
     }
 
-    private void generateRegister(String directory, Set<String> classes) {
+    private static void generateRegister(String directory, Set<String> classes) {
+        if (classes.isEmpty()) {
+            return
+        }
+
         println("initClasses.size: " + classes.size())
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
@@ -115,9 +135,11 @@ class AirTransform extends Transform {
         methodVisitor.visitEnd();
         classVisitor.visitEnd();
 
-        File pathDir = new File(directory + File.separator + "com/air/router/")
-        pathDir.mkdirs()
+//        File pathDir = new File(directory + File.separator + "com/air/router/")
+//        pathDir.mkdirs()
+
         File transFile = new File(directory + File.separator + loaderClassName + ".class")
+        transFile.getParentFile().mkdirs()
         transFile.bytes = classWriter.toByteArray();
     }
 

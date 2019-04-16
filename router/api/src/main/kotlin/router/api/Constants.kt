@@ -5,5 +5,5 @@ package router.api
  * @since 2019/3/13
  */
 object Constants {
-    val SERVICE_LOADER_CLASS = "RouteAndServiceInitializer"
+    const val SERVICE_LOADER_CLASS = "RouteInitializer"
 }
