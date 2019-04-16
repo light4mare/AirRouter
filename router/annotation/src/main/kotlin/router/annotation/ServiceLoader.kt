@@ -12,4 +12,8 @@ object ServiceLoader {
     fun put(routeInfo: RouteInfo) {
         routeMap[routeInfo.path] = routeInfo
     }
+
+    fun getRouteInfo(uri: String): RouteInfo? {
+        return routeMap[uri]
+    }
 }

@@ -6,7 +6,7 @@ dependencies {
     implementation gradleApi()
     implementation 'com.android.tools.build:gradle:3.2.1'
     implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21'
-    implementation 'org.ow2.asm:asm:6.0_ALPHA'
+    implementation 'org.ow2.asm:asm:7.1'
 //    implementation project(':router:annotation')
 }
 

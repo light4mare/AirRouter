@@ -38,8 +38,8 @@ class RouterProcessor : BaseProcessor() {
         }
 
         printWarn("RouterProcessor process")
-        val moduleName = options[MODULE_NAME] ?: "I_HAVE_NO_NAME"
-        val builder = TypeSpec.classBuilder(ROUTE_.plus(moduleName).plus(Random().nextInt(1000000)))
+        val moduleName = options[MODULE_NAME] ?: "I_HAVE_NO_NAME".plus(Random().nextInt(1000000))
+        val builder = TypeSpec.classBuilder(ROUTE_.plus(moduleName))
             .addModifiers(PUBLIC, FINAL)
 
         val funInitSpec = MethodSpec.methodBuilder("init").addModifiers(PUBLIC, STATIC)

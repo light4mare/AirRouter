@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-//apply plugin: 'kotlin-kapt'
-apply plugin: "air-router"
+apply plugin: 'kotlin-kapt'
+//apply plugin: "air-router"
 
 android {
     compileSdkVersion 28
@@ -35,6 +35,12 @@ android {
     }
 }
 
+kapt {
+    arguments {
+        arg("moduleName", project.getName())
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -46,6 +52,7 @@ dependencies {
     implementation project(':loginservice:loginserviceimpl')
     implementation project(path: ':router:api')
 
-//    implementation project(':router:annotation')
-//    kapt project(':router:compiler')
+    implementation project(':router:annotation')
+    implementation project(':loginservice:loginexport')
+    kapt project(':router:compiler')
 }
