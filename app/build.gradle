@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: "air-router"
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -35,6 +37,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-//    implementation project(':loginservice:loginexport')
-//    implementation project(':chatservice:chatexport')
+
+    implementation project(':loginservice:loginexport')
+    implementation project(':chatservice:chatexport')
+    implementation project(':loginservice:loginserviceimpl')
+    implementation project(':chatservice:chatserviceimpl')
+
+    implementation project(path: ':router:api')
 }

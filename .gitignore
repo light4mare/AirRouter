@@ -46,7 +46,7 @@ atlassian-ide-plugin.xml
 
 # AndroidStudio specific files/directories
 local.properties
-settings.gradle
+# settings.gradle
 
 # Eclipse specific files/directories
 .classpath

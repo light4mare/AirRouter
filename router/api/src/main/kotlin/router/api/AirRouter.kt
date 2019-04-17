@@ -24,19 +24,25 @@ object AirRouter {
         }
     }
 
-    fun getComponent(uri: String): Any? {
-        val routeInfo = ServiceLoader.getRouteInfo(uri)
+    fun getComponentCache(uri: String): Any? {
         val component = componentCache.get(uri)
         if (component != null) {
             return component
         }
 
+        val instance = getComponent(uri)
+        if (instance != null) {
+            componentCache.put(uri, instance)
+        }
+        return instance
+    }
+
+    fun getComponent(uri: String):Any? {
+        val routeInfo = ServiceLoader.getRouteInfo(uri)
         if (routeInfo != null) {
             val instance = Class.forName(routeInfo.classPath).newInstance()
-            componentCache.put(uri, instance)
             return instance
         }
-
         return null
     }
 }

@@ -1,2 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.example.chatserviceimpl"/>
+          package="com.example.chatserviceimpl">
+    <application>
+        <activity android:name="com.example.chat.impl.ChatActivity"/>
+    </application>
+</manifest>

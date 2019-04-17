@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-//apply plugin: "air-router"
+apply plugin: "air-router"
 
 android {
     compileSdkVersion 28
@@ -51,8 +51,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation project(':loginservice:loginserviceimpl')
     implementation project(path: ':router:api')
-
-    implementation project(':router:annotation')
     implementation project(':loginservice:loginexport')
-    kapt project(':router:compiler')
+
+//    implementation project(':router:annotation')
+//    kapt project(':router:compiler')
 }

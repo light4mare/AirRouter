@@ -24,7 +24,7 @@ class LoginMainActivity : AppCompatActivity() {
 //        ServiceLoader.put(RouteInfo("/login/ui", 1, "com.example.login.impl.design.ui.activity.LoginActivity"))
 //        ServiceLoader.put(RouteInfo("/login/service", 1, "com.example.login.impl.LoginServiceImpl"))
 
-        AirRouter.getComponent("/login/service")?.let {
+        AirRouter.getComponentCache("/login/service")?.let {
             val service = it as LoginServiceImpl
             Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
         }

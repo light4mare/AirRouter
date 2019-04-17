@@ -42,6 +42,8 @@ dependencies {
 
     implementation project(':chatservice:chatexport')
     implementation project(':common')
+    implementation project(path: ':router:api')
+    implementation project(':loginservice:loginexport')
 //    implementation project(':router:annotation')
 //    kapt project(':router:compiler')
 }
