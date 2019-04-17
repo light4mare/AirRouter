@@ -20,11 +20,11 @@ class ChatActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_chat)
 
-        AirRouter.getComponentCache(LoginServiceApi.LOGIN_SERVICE)?.let {
-            val service = it as LoginService
-            Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
-        }
-
+//        AirRouter.getComponentCache(LoginServiceApi.LOGIN_SERVICE)?.let {
+//            val service = it as LoginService
+//            Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
+//        }
+        AirRouter.getComponentCache<LoginService>(LoginServiceApi.LOGIN_SERVICE)?.hasLogin()
     }
 
     fun jumpLogin() {
