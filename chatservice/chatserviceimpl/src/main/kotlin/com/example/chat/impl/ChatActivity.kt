@@ -3,8 +3,10 @@ package com.example.chat.impl
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import com.example.chatexport.ChatServiceApi
 import com.example.chatserviceimpl.R
 import com.example.login.LoginService
+import com.example.login.LoginServiceApi
 import router.annotation.Route
 import router.api.AirRouter
 
@@ -12,13 +14,13 @@ import router.api.AirRouter
  * @author wuxi
  * @since 2019/3/6
  */
-@Route(path = "/chat/activity", priority = 2)
+@Route(path = ChatServiceApi.CHAT_ACTIVITY, priority = 2)
 class ChatActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_chat)
 
-        AirRouter.getComponentCache("/login/service")?.let {
+        AirRouter.getComponentCache(LoginServiceApi.LOGIN_SERVICE)?.let {
             val service = it as LoginService
             Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
         }
