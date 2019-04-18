@@ -3,8 +3,10 @@ package router.api
 import android.content.Context
 import android.content.Intent
 import router.annotation.ServiceLoader
+import router.api.logistics.AirDrop
 
 /**
+ * Api封装类
  * @author wuxi
  * @since 2019/4/16
  */
@@ -16,16 +18,15 @@ object AirRouter {
 //        Router.loadRouteAndService()
     }
 
-    fun startUri(context: Context, uri: String) {
-        val routeInfo = ServiceLoader.getRouteInfo(uri)
-        if (routeInfo != null) {
-            val intent = Intent()
-            intent.setClassName(context, routeInfo.classPath)
-            context.startActivity(intent)
-        }
+    fun post(context: Context, uri: String){
+        AirDrop(uri).post(context)
     }
 
-    fun <T> getComponentCache(uri: String): T? {
+    fun build(uri: String): AirDrop {
+        return AirDrop(uri)
+    }
+
+    fun <T> getCacheComponent(uri: String): T? {
         val component = componentCache.get(uri)
         if (component != null) {
             return component as T

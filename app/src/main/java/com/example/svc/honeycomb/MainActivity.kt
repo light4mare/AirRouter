@@ -15,6 +15,6 @@ class MainActivity : AppCompatActivity() {
         Route_loginserviceimpl.init()
         Route_chatserviceimpl.init()
 
-        AirRouter.startUri(this, "/chat/activity")
+        AirRouter.post(this, "/chat/activity")
     }
 }

@@ -2,7 +2,6 @@ package com.example.chat.impl
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import com.example.chatexport.ChatServiceApi
 import com.example.chatserviceimpl.R
 import com.example.login.LoginService
@@ -20,11 +19,11 @@ class ChatActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_chat)
 
-//        AirRouter.getComponentCache(LoginServiceApi.LOGIN_SERVICE)?.let {
+//        AirRouter.getCacheComponent(LoginServiceApi.LOGIN_SERVICE)?.let {
 //            val service = it as LoginService
 //            Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
 //        }
-        AirRouter.getComponentCache<LoginService>(LoginServiceApi.LOGIN_SERVICE)?.hasLogin()
+        AirRouter.getCacheComponent<LoginService>(LoginServiceApi.LOGIN_SERVICE)?.hasLogin()
     }
 
     fun jumpLogin() {
