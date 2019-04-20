@@ -4,8 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import router.annotation.ServiceLoader
+import router.api.ext.ifNull
 import router.api.logistics.AirDrop
-import router.api.logistics.Interceptor
+import router.api.logistics.Track
 
 
 /**
@@ -31,14 +32,19 @@ object Router {
         }
     }
 
-    fun post(context: Context, airDrop: AirDrop, interceptor: Interceptor?) {
+    fun post(context: Context, airDrop: AirDrop, interceptor: Track?) {
         val routeInfo = ServiceLoader.getRouteInfo(airDrop.getUri())
-        if (routeInfo != null) {
+
+        routeInfo?.apply {
+            interceptor?.onFound()
             val intent = Intent()
             intent.setClassName(context, routeInfo.classPath)
             intent.putExtras(airDrop.getExtras())
             intent.flags = airDrop.getFlags()
             context.startActivity(intent)
+            interceptor?.onArrival()
+        }.ifNull {
+            interceptor?.onLost()
         }
     }
 }

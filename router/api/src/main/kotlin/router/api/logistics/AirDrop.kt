@@ -17,8 +17,10 @@ class AirDrop(private val uri: String) {
     private var extras = Bundle()
     private var flags = -1
 
+    private var track: AirTrack? = null
+
     fun post(context: Context) {
-        Router.post(context, this, null)
+        Router.post(context, this, track)
     }
 
     fun getUri(): String {
@@ -38,6 +40,12 @@ class AirDrop(private val uri: String) {
         return this
     }
 
+    private fun getTrack(): AirTrack {
+        return track ?: AirTrack().apply {
+            track = this
+        }
+    }
+
     fun withFlags(flag: Int): AirDrop {
         this.flags = flag
         return this
@@ -47,7 +55,6 @@ class AirDrop(private val uri: String) {
         if (null != bundle) {
             extras = bundle
         }
-
         return this
     }
 
@@ -191,7 +198,23 @@ class AirDrop(private val uri: String) {
         return this
     }
 
-    fun onLost(block: () -> Unit) {
+    fun lost(block: ()->Unit): AirDrop {
+        getTrack().arrivalTrack = block
+        return this
+    }
 
+    fun found(block: ()->Unit): AirDrop {
+        getTrack().foundTrack = block
+        return this
+    }
+
+    fun arrival(block: ()->Unit): AirDrop {
+        getTrack().arrivalTrack = block
+        return this
+    }
+
+    fun intercept(block: ()->Unit): AirDrop {
+        getTrack().interceptTrack = block
+        return this
     }
 }
