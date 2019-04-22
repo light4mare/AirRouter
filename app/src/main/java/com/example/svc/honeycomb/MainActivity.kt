@@ -4,7 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import route.module.Route_chatserviceimpl
 import route.module.Route_loginserviceimpl
-import router.api.AirRouter
+import router.air.api.AirRouter
 
 class MainActivity : AppCompatActivity() {
 

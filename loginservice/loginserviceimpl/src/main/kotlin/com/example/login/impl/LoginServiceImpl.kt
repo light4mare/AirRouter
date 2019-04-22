@@ -3,7 +3,7 @@ package com.example.login.impl
 import com.example.login.LoginService
 import com.example.login.LoginServiceApi
 import com.example.login.model.UserInfo
-import router.annotation.Route
+import router.air.annotation.Route
 
 /**
  * @author wuxi

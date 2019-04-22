@@ -7,8 +7,8 @@ import com.example.login.LoginService
 import com.example.login.impl.LoginServiceImpl
 import route.module.Route_loginserviceimpl
 import route.module.Route_loginshell
-import router.annotation.Route
-import router.api.AirRouter
+import router.air.annotation.Route
+import router.air.api.AirRouter
 
 @Route("/login/shell")
 class LoginMainActivity : AppCompatActivity() {

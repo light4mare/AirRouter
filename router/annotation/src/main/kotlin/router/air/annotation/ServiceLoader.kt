@@ -1,6 +1,6 @@
-package router.annotation
+package router.air.annotation
 
-import router.annotation.info.RouteInfo
+import router.air.annotation.info.RouteInfo
 
 /**
  * @author wuxi

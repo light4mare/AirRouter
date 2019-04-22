@@ -1,4 +1,4 @@
-package com.svc.air
+package router.air
 
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension

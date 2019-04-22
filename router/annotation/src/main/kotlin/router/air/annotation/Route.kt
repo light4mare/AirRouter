@@ -1,4 +1,4 @@
-package router.annotation
+package router.air.annotation
 
 /**
  * 路由标记，用于标记activity、service和自定义service

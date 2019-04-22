@@ -1,4 +1,4 @@
-package router.annotation.info
+package router.air.annotation.info
 
 /**
  * ui组件信息

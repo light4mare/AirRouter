@@ -2,8 +2,8 @@ package com.example.login.impl.design.ui.activity
 
 import android.app.Activity
 import com.example.login.LoginServiceApi
-import router.annotation.Extra
-import router.annotation.Route
+import router.air.annotation.Extra
+import router.air.annotation.Route
 
 /**
  * @author wuxi

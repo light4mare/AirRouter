@@ -6,8 +6,8 @@ import com.example.chatexport.ChatServiceApi
 import com.example.chatserviceimpl.R
 import com.example.login.LoginService
 import com.example.login.LoginServiceApi
-import router.annotation.Route
-import router.api.AirRouter
+import router.air.annotation.Route
+import router.air.api.AirRouter
 
 /**
  * @author wuxi

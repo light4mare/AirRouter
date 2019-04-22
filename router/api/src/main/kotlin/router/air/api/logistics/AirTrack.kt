@@ -1,4 +1,4 @@
-package router.api.logistics
+package router.air.api.logistics
 
 /**
  * 跳转回调

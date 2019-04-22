@@ -1,10 +1,10 @@
-package router.compiler
+package router.air.compiler
 
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
-import router.annotation.Route
+import router.air.annotation.Route
 import java.util.*
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -24,8 +24,8 @@ class RouterProcessor : BaseProcessor() {
     private val SEPERATOR = "_"
     private val ROUTE_ = "Route_"
     private val MODULE_NAME = "moduleName"
-    private val SERVICE_LOADER_CLASS = "router.annotation.ServiceLoader"
-    private val ROUTE_INFO_CLASS = "router.annotation.info.RouteInfo"
+    private val SERVICE_LOADER_CLASS = "router.air.annotation.ServiceLoader"
+    private val ROUTE_INFO_CLASS = "router.air.annotation.info.RouteInfo"
 
     override fun getAnnotationClass(): Class<out Annotation> {
         return Route::class.java

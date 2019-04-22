@@ -1,9 +1,8 @@
-package router.api
+package router.air.api
 
 import android.content.Context
-import android.content.Intent
-import router.annotation.ServiceLoader
-import router.api.logistics.AirDrop
+import router.air.annotation.ServiceLoader
+import router.air.api.logistics.AirDrop
 
 /**
  * Api封装类
