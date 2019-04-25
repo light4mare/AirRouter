@@ -24,7 +24,7 @@ class AirTransform extends Transform {
 
     @Override
     String getName() {
-        return "AirRouterTransform"
+        return "AirRouter"
     }
 
     @Override
@@ -51,45 +51,43 @@ class AirTransform extends Transform {
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 //        super.transform(transformInvocation)
-        println "----------------2333333333333333 AirTransform begin----------------"
-
-//        def outDir = transformInvocation.outputProvider.getContentLocation("route", TransformManager.CONTENT_CLASS, ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY)
-//        outDir.deleteDir()
-//        outDir.mkdirs()
-
-        File dest = transformInvocation.getOutputProvider().getContentLocation(
-                "routePath", TransformManager.CONTENT_CLASS,
-                ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY);
-//        println("WMRouter :" + dest)
-
-//        String dir = outDir.toString();
-        String dir = dest.toString();
-//        println("routePath :" + outDir)
 
         Set<String> initClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         transformInvocation.inputs.each {
-            it.directoryInputs.each { directoryInput ->
-//                println("directoryInputs:__" + input.name)
-                int length = directoryInput.file.toString().length()
-                directoryInput.file.traverse { file ->
-                    String className = file.toString().substring(length + 1).replace("\\", ".")
-//                    println("directoryInputs:__" + className)
-                    if (isTargetClass(className)) {
-                        initClasses.add(className)
+            it.directoryInputs.parallelStream().each { directoryInput ->
+                    int length = directoryInput.file.toString().length()
+                    directoryInput.file.traverse { file ->
+                        String className = file.toString().substring(length + 1).replace("\\", ".")
+                        if (isTargetClass(className)) {
+                            initClasses.add(className)
+                        }
                     }
-                }
-                File dst = transformInvocation.getOutputProvider().getContentLocation(
-                        directoryInput.getName(), directoryInput.getContentTypes(),
-                        directoryInput.getScopes(), Format.DIRECTORY);
-                FileUtils.copyDirectory(directoryInput.file, dst);
+                    File dst = transformInvocation.getOutputProvider().getContentLocation(
+                            directoryInput.getName(), directoryInput.getContentTypes(),
+                            directoryInput.getScopes(), Format.DIRECTORY);
+                    FileUtils.copyDirectory(directoryInput.file, dst);
             }
 
-            it.jarInputs.each { jarInput ->
+//            input.getDirectoryInputs().parallelStream().forEach(directoryInput -> {
+//                File src = directoryInput.getFile();
+//                File dst = invocation.getOutputProvider().getContentLocation(
+//                        directoryInput.getName(), directoryInput.getContentTypes(),
+//                        directoryInput.getScopes(), Format.DIRECTORY);
+//                try {
+//                    scanDir(src, initClasses);
+//                    FileUtils.copyDirectory(src, dst);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
+
+//            it.directoryInputs.each {
+//            }
+
+            it.jarInputs.parallelStream().each { jarInput ->
                 JarFile jarFile = new JarFile(jarInput.file)
-//                println("jarFile :" + input.file)
                 jarFile.entries().each { entry ->
-//                    println ("jarInputs:__" + entry.getName())
                     String className = entry.getName().replace("/", ".")
                     if (isTargetClass(className)) {
                         initClasses.add(className)
@@ -101,11 +99,31 @@ class AirTransform extends Transform {
                 FileUtils.copyFile(jarInput.file, dst)
             }
 
+//            it.jarInputs.each { jarInput ->
+//            }
+
+//            input.getJarInputs().parallelStream().forEach(jarInput -> {
+//                File src = jarInput.getFile();
+//                File dst = invocation.getOutputProvider().getContentLocation(
+//                        jarInput.getName(), jarInput.getContentTypes(), jarInput.getScopes(),
+//                        Format.JAR);
+//                try {
+//                    scanJarFile(src, initClasses);
+//                    FileUtils.copyFile(src, dst);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
+
         }
 
-        generateRegister(dir, initClasses)
+        File dest = transformInvocation.getOutputProvider().getContentLocation(
+                "AirRouter", TransformManager.CONTENT_CLASS,
+                ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY);
 
-        println "----------------2333333333333333 AirTransform finish----------------"
+        String dir = dest.absolutePath
+
+        generateRegister(dir, initClasses)
     }
 
     private static void generateRegister(String directory, Set<String> classes) {
@@ -116,16 +134,16 @@ class AirTransform extends Transform {
         println("initClasses.size: " + classes.size())
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
-        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM7, classWriter) {}
+        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM5, classWriter) {}
         String loaderClassName = "com/air/router/RouteInitializer"
         // 生成类
-        classVisitor.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, loaderClassName, null, "java/lang/Object", null)
+        classVisitor.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, loaderClassName, null, "java/lang/Object", null)
         // 生成初始化方法
         MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "init", "()V", null, null);
         // 开始写方法代码
         methodVisitor.visitCode()
         classes.each { clazz ->
-            String clazzName = clazz.substring(0, clazz.length() - 6)
+            String clazzName = clazz.substring(0, clazz.length() - 6).replace(".", "/")
             println("initClasses: " + clazzName)
             methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, clazzName, "init", "()V", false);
         }

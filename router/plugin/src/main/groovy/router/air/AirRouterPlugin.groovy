@@ -46,10 +46,10 @@ class AirRouterPlugin implements Plugin<Project> {
 
         // 只有作为启动程序module才合并代码
         // 也可以传进去决定scope
-//        if (isApp) {
-////            project.extensions.findByType(BaseExtension.class).registerTransform(new AirTransform(isApp))
-//            project.extensions.findByType(AppExtension.class).registerTransform(new AirTransform(isApp))
-//        }
+        if (isApp) {
+//            project.extensions.findByType(BaseExtension.class).registerTransform(new AirTransform(isApp))
+            project.extensions.findByType(AppExtension.class).registerTransform(new AirTransform(isApp))
+        }
 
 //        def androidExtension = project.extensions.getByName("android")
     }

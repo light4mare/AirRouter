@@ -16,9 +16,9 @@ class LoginMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_main)
 
-//        AirRouter.init()
-        Route_loginserviceimpl.init()
-        Route_loginshell.init()
+        AirRouter.init()
+//        Route_loginserviceimpl.init()
+//        Route_loginshell.init()
 //        ServiceLoader.put(RouteInfo("/login/shell", 0, "com.example.loginshell.LoginMainActivity"))
 //        ServiceLoader.put(RouteInfo("/login/ui", 1, "com.example.login.impl.design.ui.activity.LoginActivity"))
 //        ServiceLoader.put(RouteInfo("/login/service", 1, "com.example.login.impl.LoginServiceImpl"))

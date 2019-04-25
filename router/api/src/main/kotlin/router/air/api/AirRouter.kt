@@ -14,7 +14,7 @@ object AirRouter {
     private val componentCache = java.util.HashMap<String, Any>()
 
     fun init() {
-//        Router.loadRouteAndService()
+        Router.loadRouteAndService()
     }
 
     fun post(context: Context, uri: String){
