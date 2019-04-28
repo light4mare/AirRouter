@@ -5,6 +5,7 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.google.common.collect.ImmutableSet
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
+import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.MethodVisitor
@@ -58,6 +59,9 @@ class AirTransform extends Transform {
             it.directoryInputs.parallelStream().each { directoryInput ->
                     int length = directoryInput.file.toString().length()
                     directoryInput.file.traverse { file ->
+                        if (file.name.contains("RoustServiceLoader")) {
+                            visitOrigin(file)
+                        }
                         String className = file.toString().substring(length + 1).replace("\\", ".")
                         if (isTargetClass(className)) {
                             initClasses.add(className)
@@ -139,7 +143,8 @@ class AirTransform extends Transform {
         // 生成类
         classVisitor.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, loaderClassName, null, "java/lang/Object", null)
         // 生成初始化方法
-        MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "init", "()V", null, null);
+//        "java.lang.String, router.air.annotation.info.RouteInfo"
+        MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "init", "(Ljava/util/Map<>;)V", "(Ljava/util/Map<Ljava/lang/String;Lrouter/air/annotation/info/RouteInfo;>;)V", null);
         // 开始写方法代码
         methodVisitor.visitCode()
         classes.each { clazz ->
@@ -163,5 +168,13 @@ class AirTransform extends Transform {
 
     private static boolean isTargetClass(String className) {
         return className.startsWith(ROUTE_PREFIX) && className.endsWith(".class")
+    }
+
+    private static visitOrigin(File file) {
+        ClassReader classReader = new ClassReader(file.bytes);
+
+        OriginClassVisitor visitor = new OriginClassVisitor(Opcodes.ASM7)
+
+        classReader.accept(visitor, Opcodes.ASM7);
     }
 }

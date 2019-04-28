@@ -12,8 +12,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Route_loginserviceimpl.init()
-        Route_chatserviceimpl.init()
+//        Route_loginserviceimpl.init()
+//        Route_chatserviceimpl.init()
 
         AirRouter.post(this, "/chat/activity")
     }

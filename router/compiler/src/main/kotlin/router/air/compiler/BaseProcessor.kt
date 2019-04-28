@@ -1,9 +1,14 @@
 package router.air.compiler
 
 import com.google.common.collect.ImmutableSet
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
+import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
-import javax.annotation.processing.*
+import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.Filer
+import javax.annotation.processing.Messager
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.PackageElement
@@ -21,6 +26,8 @@ abstract class BaseProcessor : AbstractProcessor() {
     protected lateinit var messager: Messager
     protected lateinit var elementUtils: Elements
     protected lateinit var options: Map<String, String>
+
+    protected val notNullAnnotation by lazy { ClassName.get("android.support.annotation", "NonNull") }
 
     override fun init(env: ProcessingEnvironment) {
         super.init(env)
@@ -83,6 +90,12 @@ abstract class BaseProcessor : AbstractProcessor() {
         val builder = JavaFile.builder(packageName, typeSpec)
         val builderFile = builder.build()
         builderFile.writeTo(filer)
+    }
+
+    protected fun createNonNullParam(className: ClassName, name: String): ParameterSpec {
+        val builder = ParameterSpec.builder(className, name)
+        builder.addAnnotation(notNullAnnotation)
+        return builder.build()
     }
 
     override fun getSupportedAnnotationTypes(): Set<String> {

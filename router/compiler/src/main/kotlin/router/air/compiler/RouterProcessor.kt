@@ -1,17 +1,13 @@
 package router.air.compiler
 
 import com.google.auto.service.AutoService
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import router.air.annotation.Route
 import java.util.*
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
-import javax.lang.model.element.Modifier.FINAL
-import javax.lang.model.element.Modifier.PUBLIC
-import javax.lang.model.element.Modifier.STATIC
+import javax.lang.model.element.Modifier.*
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.TypeMirror
 
@@ -24,8 +20,9 @@ class RouterProcessor : BaseProcessor() {
     private val SEPERATOR = "_"
     private val ROUTE_ = "Route_"
     private val MODULE_NAME = "moduleName"
-    private val SERVICE_LOADER_CLASS = "router.air.annotation.ServiceLoader"
     private val ROUTE_INFO_CLASS = "router.air.annotation.info.RouteInfo"
+    private val routeInfoMapClass by lazy { ClassName.get("java.util", "Map") }
+    private val routeInfoMapParams = "routeMap"
 
     override fun getAnnotationClass(): Class<out Annotation> {
         return Route::class.java
@@ -42,15 +39,21 @@ class RouterProcessor : BaseProcessor() {
         val builder = TypeSpec.classBuilder(ROUTE_.plus(moduleName))
             .addModifiers(PUBLIC, FINAL)
 
-        val funInitSpec = MethodSpec.methodBuilder("init").addModifiers(PUBLIC, STATIC)
-        val serviceLoaderClass = className(SERVICE_LOADER_CLASS)
-//        val  serviceLoaderClass = ClassName.get("router.api", "ServiceLoader")
         val routeClass = className(ROUTE_INFO_CLASS)
+        val stringClass = ClassName.get(String::class.java)
+
+        val routeInfoClass = ParameterizedTypeName.get(routeInfoMapClass, stringClass, routeClass)
+        val parameterSpec = ParameterSpec.builder(routeInfoClass, routeInfoMapParams).build()
+
+        val funInitSpec = MethodSpec.methodBuilder("init")
+            .addModifiers(PUBLIC, STATIC)
+            .addParameter(parameterSpec)
 
         for (annotatedElement in sourceClassList) {
             try {
                 val annotation = annotatedElement.getAnnotation(Route::class.java)
-                funInitSpec.addStatement("\$T.INSTANCE.put(new \$T(\"\$L\", \$L, \"\$L\"))", serviceLoaderClass, routeClass, annotation.path, annotation.priority, annotatedElement.asType().toString())
+                funInitSpec.addStatement("\$L.put(\"\$L\", new \$T(\"\$L\", \$L, \"\$L\"))",
+                    routeInfoMapParams, annotation.path, routeClass, annotation.path, annotation.priority, annotatedElement.asType().toString())
             } catch (e: Exception) {
                 printErr(
                     annotatedElement,

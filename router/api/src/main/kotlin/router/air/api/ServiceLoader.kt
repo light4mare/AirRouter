@@ -1,4 +1,4 @@
-package router.air.annotation
+package router.air.api
 
 import router.air.annotation.info.RouteInfo
 
