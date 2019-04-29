@@ -25,7 +25,9 @@ object Router {
 //        val initClazz = context.packageName.plus(Constants.SERVICE_LOADER_CLASS)
         val initClazz = "com.air.router.RouteInitializer"
         try {
-            Class.forName(initClazz).getMethod("init").invoke(null)
+            val initClass = Class.forName(initClazz)
+            val method = initClass.getMethod("init", Map::class.java)
+            method.invoke(null, ServiceLoader.routeMap)
         } catch (e: Exception) {
             Log.e("loadRouteAndService", e.message)
         }

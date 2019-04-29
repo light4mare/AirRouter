@@ -30,18 +30,12 @@ class AirTransform extends Transform {
 
     @Override
     Set<QualifiedContent.ContentType> getInputTypes() {
-//        return ImmutableSet.of(TransformManager.CLASSES, TransformManager.RESOURCES)
         return TransformManager.CONTENT_JARS
     }
 
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
         return TransformManager.SCOPE_FULL_PROJECT
-//        if (isApp) {
-//            return TransformManager.SCOPE_FULL_PROJECT
-//        } else {
-//            return ImmutableSet.of(QualifiedContent.Scope.PROJECT)
-//        }
     }
 
     @Override
@@ -139,18 +133,21 @@ class AirTransform extends Transform {
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
         ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM5, classWriter) {}
-        String loaderClassName = "com/air/router/RouteInitializer"
+        String loaderClassName = Constants.TYPE_LOADER
         // 生成类
-        classVisitor.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, loaderClassName, null, "java/lang/Object", null)
+        classVisitor.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, loaderClassName, null, Constants.TYPE_OBJECT, null)
         // 生成初始化方法
-//        "java.lang.String, router.air.annotation.info.RouteInfo"
-        MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "init", "(Ljava/util/Map<>;)V", "(Ljava/util/Map<Ljava/lang/String;Lrouter/air/annotation/info/RouteInfo;>;)V", null);
+        MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+                "init",
+                "(${Constants.TYPE_CLASS_MAP})V",
+                "(${Constants.TYPE_CLASS_MAP}<${Constants.TYPE_CLASS_STRING}${Constants.TYPE_CLASS_ROUTE_INFO}>;)V", null);
         // 开始写方法代码
         methodVisitor.visitCode()
         classes.each { clazz ->
             String clazzName = clazz.substring(0, clazz.length() - 6).replace(".", "/")
             println("initClasses: " + clazzName)
-            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, clazzName, "init", "()V", false);
+            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0)
+            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, clazzName, "init", "($Constants.TYPE_CLASS_MAP)V", false);
         }
         // 由于前面用了COMPUTE_FRAMES，这里随便传
         methodVisitor.visitMaxs(0, 0);
@@ -161,13 +158,13 @@ class AirTransform extends Transform {
 //        File pathDir = new File(directory + File.separator + "com/air/router/")
 //        pathDir.mkdirs()
 
-        File transFile = new File(directory + File.separator + loaderClassName + ".class")
+        File transFile = new File(directory + File.separator + loaderClassName + Constants.DOT_CLASS)
         transFile.getParentFile().mkdirs()
         transFile.bytes = classWriter.toByteArray();
     }
 
     private static boolean isTargetClass(String className) {
-        return className.startsWith(ROUTE_PREFIX) && className.endsWith(".class")
+        return className.startsWith(ROUTE_PREFIX) && className.endsWith(Constants.DOT_CLASS)
     }
 
     private static visitOrigin(File file) {
