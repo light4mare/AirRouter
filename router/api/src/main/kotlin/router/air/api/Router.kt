@@ -22,10 +22,8 @@ object Router {
      * 加载所有模块提供的组件路径
      */
     fun loadRouteAndService() {
-//        val initClazz = context.packageName.plus(Constants.SERVICE_LOADER_CLASS)
-        val initClazz = "com.air.router.RouteInitializer"
         try {
-            val initClass = Class.forName(initClazz)
+            val initClass = Class.forName(Constants.SERVICE_LOADER_CLASS)
             val method = initClass.getMethod("init", Map::class.java)
             method.invoke(null, ServiceLoader.routeMap)
         } catch (e: Exception) {

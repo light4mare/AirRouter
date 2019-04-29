@@ -15,7 +15,7 @@ import java.util.*
  */
 class AirDrop(private val uri: String) {
     private var extras = Bundle()
-    private var flags = -1
+    private var flags = 0
 
     private var track: AirTrack? = null
 
