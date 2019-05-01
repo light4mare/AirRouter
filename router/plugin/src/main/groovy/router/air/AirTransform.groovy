@@ -45,45 +45,30 @@ class AirTransform extends Transform {
 
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-//        super.transform(transformInvocation)
+        super.transform(transformInvocation)
 
         Set<String> initClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         transformInvocation.inputs.each {
-            it.directoryInputs.parallelStream().each { directoryInput ->
-                    int length = directoryInput.file.toString().length()
-                    directoryInput.file.traverse { file ->
-                        if (file.name.contains("RoustServiceLoader")) {
-                            visitOrigin(file)
-                        }
-                        String className = file.toString().substring(length + 1).replace("\\", ".")
-                        if (isTargetClass(className)) {
-                            initClasses.add(className)
-                        }
+            it.directoryInputs.each {directoryInput ->
+                int length = directoryInput.file.toString().length()
+                directoryInput.file.traverse { file ->
+                    if (file.name.contains("RoustServiceLoader")) {
+                        visitOrigin(file)
                     }
-                    File dst = transformInvocation.getOutputProvider().getContentLocation(
-                            directoryInput.getName(), directoryInput.getContentTypes(),
-                            directoryInput.getScopes(), Format.DIRECTORY);
-                    FileUtils.copyDirectory(directoryInput.file, dst);
+                    String className = file.toString().substring(length + 1).replace("\\", ".")
+                    if (isTargetClass(className)) {
+                        initClasses.add(className)
+                    }
+                }
+                File dst = transformInvocation.getOutputProvider().getContentLocation(
+                        directoryInput.getName(), directoryInput.getContentTypes(),
+                        directoryInput.getScopes(), Format.DIRECTORY);
+                FileUtils.copyDirectory(directoryInput.file, dst);
             }
 
-//            input.getDirectoryInputs().parallelStream().forEach(directoryInput -> {
-//                File src = directoryInput.getFile();
-//                File dst = invocation.getOutputProvider().getContentLocation(
-//                        directoryInput.getName(), directoryInput.getContentTypes(),
-//                        directoryInput.getScopes(), Format.DIRECTORY);
-//                try {
-//                    scanDir(src, initClasses);
-//                    FileUtils.copyDirectory(src, dst);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
 
-//            it.directoryInputs.each {
-//            }
-
-            it.jarInputs.parallelStream().each { jarInput ->
+            it.jarInputs.each { jarInput ->
                 JarFile jarFile = new JarFile(jarInput.file)
                 jarFile.entries().each { entry ->
                     String className = entry.getName().replace("/", ".")
@@ -96,23 +81,6 @@ class AirTransform extends Transform {
                         Format.JAR);
                 FileUtils.copyFile(jarInput.file, dst)
             }
-
-//            it.jarInputs.each { jarInput ->
-//            }
-
-//            input.getJarInputs().parallelStream().forEach(jarInput -> {
-//                File src = jarInput.getFile();
-//                File dst = invocation.getOutputProvider().getContentLocation(
-//                        jarInput.getName(), jarInput.getContentTypes(), jarInput.getScopes(),
-//                        Format.JAR);
-//                try {
-//                    scanJarFile(src, initClasses);
-//                    FileUtils.copyFile(src, dst);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
-
         }
 
         File dest = transformInvocation.getOutputProvider().getContentLocation(
@@ -132,10 +100,10 @@ class AirTransform extends Transform {
         println("initClasses.size: " + classes.size())
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
-        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM5, classWriter) {}
+        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM7, classWriter) {}
         String loaderClassName = Constants.TYPE_LOADER
         // 生成类
-        classVisitor.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC, loaderClassName, null, Constants.TYPE_OBJECT, null)
+        classVisitor.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, loaderClassName, null, Constants.TYPE_OBJECT, null)
         // 生成初始化方法
         MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
                 "init",
@@ -154,9 +122,6 @@ class AirTransform extends Transform {
         methodVisitor.visitInsn(Opcodes.RETURN);
         methodVisitor.visitEnd();
         classVisitor.visitEnd();
-
-//        File pathDir = new File(directory + File.separator + "com/air/router/")
-//        pathDir.mkdirs()
 
         File transFile = new File(directory + File.separator + loaderClassName + Constants.DOT_CLASS)
         transFile.getParentFile().mkdirs()
