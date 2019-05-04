@@ -16,6 +16,7 @@ import java.util.jar.JarFile
 
 class AirTransform extends Transform {
     private static final ROUTE_PREFIX = "route.module.Route_"
+    private static final ROUTE_SERVICE_PREFIX = "route.module.RouteService_"
 
     private boolean isApp
 
@@ -48,6 +49,7 @@ class AirTransform extends Transform {
         super.transform(transformInvocation)
 
         Set<String> initClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        Set<String> initServiceClasses = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         transformInvocation.inputs.each {
             it.directoryInputs.each {directoryInput ->
@@ -57,8 +59,11 @@ class AirTransform extends Transform {
                         visitOrigin(file)
                     }
                     String className = file.toString().substring(length + 1).replace("\\", ".")
-                    if (isTargetClass(className)) {
+                    if (isTargetClass(className, ROUTE_PREFIX)) {
                         initClasses.add(className)
+                    }
+                    if (isTargetClass(className, ROUTE_SERVICE_PREFIX)) {
+                        initServiceClasses.add(className)
                     }
                 }
                 File dst = transformInvocation.getOutputProvider().getContentLocation(
@@ -72,8 +77,11 @@ class AirTransform extends Transform {
                 JarFile jarFile = new JarFile(jarInput.file)
                 jarFile.entries().each { entry ->
                     String className = entry.getName().replace("/", ".")
-                    if (isTargetClass(className)) {
+                    if (isTargetClass(className, ROUTE_PREFIX)) {
                         initClasses.add(className)
+                    }
+                    if (isTargetClass(className, ROUTE_SERVICE_PREFIX)) {
+                        initServiceClasses.add(className)
                     }
                 }
                 File dst = transformInvocation.getOutputProvider().getContentLocation(
@@ -89,10 +97,12 @@ class AirTransform extends Transform {
 
         String dir = dest.absolutePath
 
-        generateRegister(dir, initClasses)
+//        generateRegister(dir, initClasses)
+        generateRegister(dir, initClasses, Constants.TYPE_CLASS_ROUTE_INFO, Constants.TYPE_LOADER)
+        generateRegister(dir, initServiceClasses, Constants.TYPE_CLASS_Service_INFO, Constants.TYPE_SERVICE_LOADER)
     }
 
-    private static void generateRegister(String directory, Set<String> classes) {
+    private static void generateRegister(String directory, Set<String> classes, String modelClass, String finalClass) {
         if (classes.isEmpty()) {
             return
         }
@@ -101,14 +111,15 @@ class AirTransform extends Transform {
 
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
         ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM7, classWriter) {}
-        String loaderClassName = Constants.TYPE_LOADER
+        String loaderClassName = finalClass
         // 生成类
         classVisitor.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, loaderClassName, null, Constants.TYPE_OBJECT, null)
         // 生成初始化方法
+        //(Ljava/util/Map<Ljava/lang/String;Lrouter/air/annotation/info/RouteInfo;>;)V
         MethodVisitor methodVisitor = classVisitor.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
                 "init",
                 "(${Constants.TYPE_CLASS_MAP})V",
-                "(${Constants.TYPE_CLASS_MAP}<${Constants.TYPE_CLASS_STRING}${Constants.TYPE_CLASS_ROUTE_INFO}>;)V", null);
+                "(${Constants.TYPE_CLASS_MAP_GENERIC}<${Constants.TYPE_CLASS_STRING}${modelClass}>;)V", null);
         // 开始写方法代码
         methodVisitor.visitCode()
         classes.each { clazz ->
@@ -128,8 +139,8 @@ class AirTransform extends Transform {
         transFile.bytes = classWriter.toByteArray();
     }
 
-    private static boolean isTargetClass(String className) {
-        return className.startsWith(ROUTE_PREFIX) && className.endsWith(Constants.DOT_CLASS)
+    private static boolean isTargetClass(String className, String target) {
+        return className.startsWith(target) && className.endsWith(Constants.DOT_CLASS)
     }
 
     private static visitOrigin(File file) {

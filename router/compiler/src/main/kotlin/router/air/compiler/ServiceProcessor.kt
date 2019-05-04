@@ -2,7 +2,7 @@ package router.air.compiler
 
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.*
-import router.air.annotation.Route
+import router.air.annotation.Service
 import java.util.*
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -16,20 +16,20 @@ import javax.lang.model.type.TypeMirror
  * @since 2019/3/12
  */
 @AutoService(Processor::class)
-class RouterProcessor : BaseProcessor() {
+class ServiceProcessor : BaseProcessor() {
     private val SEPERATOR = "_"
-    private val ROUTE_ = "Route_"
+    private val ROUTE_ = "RouteService_"
     private val MODULE_NAME = "moduleName"
-    private val ROUTE_INFO_CLASS = "router.air.annotation.info.RouteInfo"
+    private val SERVICE_INFO_CLASS = "router.air.annotation.info.ServiceInfo"
     private val routeInfoMapClass by lazy { ClassName.get("java.util", "Map") }
     private val routeInfoMapParams = "routeMap"
 
     override fun getAnnotationClass(): Class<out Annotation> {
-        return Route::class.java
+        return Service::class.java
     }
 
     override fun process(set: MutableSet<out TypeElement>?, env: RoundEnvironment): Boolean {
-        val sourceClassList = env.getElementsAnnotatedWith(Route::class.java)
+        val sourceClassList = env.getElementsAnnotatedWith(Service::class.java)
         if (sourceClassList.size <= 0) {
             return true
         }
@@ -38,11 +38,11 @@ class RouterProcessor : BaseProcessor() {
         val builder = TypeSpec.classBuilder(ROUTE_.plus(moduleName))
             .addModifiers(PUBLIC, FINAL)
 
-        val routeClass = className(ROUTE_INFO_CLASS)
+        val serviceClass = className(SERVICE_INFO_CLASS)
         val stringClass = ClassName.get(String::class.java)
 
-        val routeInfoClass = ParameterizedTypeName.get(routeInfoMapClass, stringClass, routeClass)
-        val parameterSpec = ParameterSpec.builder(routeInfoClass, routeInfoMapParams).build()
+        val serviceInfoClass = ParameterizedTypeName.get(routeInfoMapClass, stringClass, serviceClass)
+        val parameterSpec = ParameterSpec.builder(serviceInfoClass, routeInfoMapParams).build()
 
         val funInitSpec = MethodSpec.methodBuilder("init")
             .addModifiers(PUBLIC, STATIC)
@@ -50,9 +50,20 @@ class RouterProcessor : BaseProcessor() {
 
         for (annotatedElement in sourceClassList) {
             try {
-                val annotation = annotatedElement.getAnnotation(Route::class.java)
-                funInitSpec.addStatement("\$L.put(\"\$L\", new \$T(\"\$L\", \$L, \"\$L\"))",
-                    routeInfoMapParams, annotation.path, routeClass, annotation.path, annotation.priority, annotatedElement.asType().toString())
+                val annotation = annotatedElement.getAnnotation(Service::class.java)
+
+                val typeElement = annotatedElement as TypeElement
+                val curServiceClass = annotatedElement.asType().toString()
+                for (serviceInterface in typeElement.interfaces) {
+                    val interfaceClass = serviceInterface.toString()
+                    funInitSpec.addStatement("\$L.put(\"\$L\", new \$T(\"\$L\", \"\$L\", \$L, \"\$L\"))",
+                        routeInfoMapParams, interfaceClass, serviceClass, interfaceClass, annotation.path, annotation.priority, curServiceClass
+                    )
+                }
+
+                funInitSpec.addStatement("\$L.put(\"\$L\", new \$T(\"\$L\", \"\$L\", \$L, \"\$L\"))",
+                    routeInfoMapParams, annotation.path, serviceClass, curServiceClass, annotation.path, annotation.priority, curServiceClass
+                )
             } catch (e: Exception) {
                 printErr(
                     annotatedElement,
@@ -70,7 +81,7 @@ class RouterProcessor : BaseProcessor() {
     }
 
     override fun createTypeSpec(annotatedElement: Element): TypeSpec {
-        val name = ROUTE_.plus(getPathName(annotatedElement.getAnnotation(Route::class.java).path))
+        val name = ROUTE_.plus(getPathName(annotatedElement.getAnnotation(Service::class.java).path))
 
         val builder = TypeSpec.classBuilder(name)
             .addModifiers(PUBLIC, FINAL)
