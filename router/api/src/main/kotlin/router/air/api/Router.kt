@@ -22,10 +22,15 @@ object Router {
      * 加载所有模块提供的组件路径
      */
     fun loadRouteAndService() {
+        initialize(Constants.ROUTE_LOADER_CLASS, ServiceLoader.routeMap)
+        initialize(Constants.SERVICE_LOADER_CLASS, ServiceLoader.serviceMap)
+    }
+
+    private fun initialize(clazz: String, map: Any) {
         try {
-            val initClass = Class.forName(Constants.SERVICE_LOADER_CLASS)
+            val initClass = Class.forName(clazz)
             val method = initClass.getMethod("init", Map::class.java)
-            method.invoke(null, ServiceLoader.routeMap)
+            method.invoke(null, map)
         } catch (e: Exception) {
             Log.e("loadRouteAndService", e.message)
         }

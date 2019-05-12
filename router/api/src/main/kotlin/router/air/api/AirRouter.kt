@@ -10,13 +10,13 @@ import router.air.api.logistics.AirDrop
  */
 @Suppress("UNCHECKED_CAST")
 object AirRouter {
-    private val componentCache = java.util.HashMap<String, Any>()
+    private val componentCache = mutableMapOf<String, Any>()
 
     fun init() {
         Router.loadRouteAndService()
     }
 
-    fun post(context: Context, uri: String){
+    fun post(context: Context, uri: String) {
         AirDrop(uri).post(context)
     }
 
@@ -24,25 +24,34 @@ object AirRouter {
         return AirDrop(uri)
     }
 
-    fun <T> getCacheComponent(uri: String): T? {
-        val component = componentCache.get(uri)
+    fun <T: Any> getCacheService(uri: String): T? {
+        val component = componentCache[uri]
         if (component != null) {
             return component as T
         }
 
-        val instance = getComponent<T>(uri)
+        val instance = getService<T>(uri)
         if (instance != null) {
-            componentCache.put(uri, instance)
+            componentCache[uri] = instance
         }
         return instance
     }
 
-    fun <T> getComponent(uri: String): T? {
+    fun <T> getService(uri: String): T? {
         val routeInfo = ServiceLoader.getRouteInfo(uri)
         if (routeInfo != null) {
             val instance = Class.forName(routeInfo.classPath).newInstance()
             return instance as T
         }
+        return null
+    }
+
+    fun <T> getService(clazz: Class<T>): T? {
+        ServiceLoader.getServiceInfo(clazz.name)?.let {
+            val instance = Class.forName(it.classPath).newInstance()
+            return instance as T
+        }
+
         return null
     }
 }

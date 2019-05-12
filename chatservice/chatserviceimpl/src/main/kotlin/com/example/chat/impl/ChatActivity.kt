@@ -2,6 +2,7 @@ package com.example.chat.impl
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import com.example.chatexport.ChatServiceApi
 import com.example.chatserviceimpl.R
 import com.example.login.LoginService
@@ -23,7 +24,11 @@ class ChatActivity : Activity() {
 //            val service = it as LoginService
 //            Log.e("2333333getComponent: ", "service.hasLogin(): ${service.hasLogin()}")
 //        }
-        AirRouter.getCacheComponent<LoginService>(LoginServiceApi.LOGIN_SERVICE)?.hasLogin()
+        AirRouter.getService<LoginService>(LoginServiceApi.LOGIN_SERVICE)?.hasLogin()
+
+        AirRouter.getService(LoginService::class.java)?.let {
+            Log.e("LoginService", "hasLogin: ${it.hasLogin()}")
+        }
     }
 
     fun jumpLogin() {
