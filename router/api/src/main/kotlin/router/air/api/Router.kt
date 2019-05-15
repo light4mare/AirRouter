@@ -1,5 +1,6 @@
 package router.air.api
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -44,7 +45,11 @@ object Router {
             val intent = Intent()
             intent.setClassName(context, routeInfo.classPath)
             intent.putExtras(airDrop.getExtras())
-            intent.flags = airDrop.getFlags()
+            if (airDrop.getFlags() != -1) {
+                intent.flags = airDrop.getFlags()
+            } else if (context !is Activity) {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
             context.startActivity(intent)
             interceptor?.onArrival()
         }.ifNull {

@@ -2,7 +2,9 @@ package router.air.compiler
 
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.*
+import router.air.annotation.Extra
 import router.air.annotation.Route
+import router.air.compiler.model.ExtraInfo
 import java.util.*
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -50,9 +52,18 @@ class RouterProcessor : BaseProcessor() {
 
         for (annotatedElement in sourceClassList) {
             try {
+//                processVM(annotatedElement)
+
                 val annotation = annotatedElement.getAnnotation(Route::class.java)
-                funInitSpec.addStatement("\$L.put(\"\$L\", new \$T(\"\$L\", \$L, \"\$L\"))",
-                    routeInfoMapParams, annotation.path, routeClass, annotation.path, annotation.priority, annotatedElement.asType().toString())
+                funInitSpec.addStatement(
+                    "\$L.put(\"\$L\", new \$T(\"\$L\", \$L, \"\$L\"))",
+                    routeInfoMapParams,
+                    annotation.path,
+                    routeClass,
+                    annotation.path,
+                    annotation.priority,
+                    annotatedElement.asType().toString()
+                )
             } catch (e: Exception) {
                 printErr(
                     annotatedElement,
@@ -102,5 +113,43 @@ class RouterProcessor : BaseProcessor() {
      */
     fun className(className: String): ClassName {
         return ClassName.get(typeElement(className))
+    }
+
+    // ====================================================processVM====================================================
+    private fun processVM(annotatedElement: Element) {
+        try {
+            val className = annotatedElement.asType().toString()
+            val typeElement = typeElement(className)
+
+            val superclass = typeElement.superclass.toString()
+            val genericStart = superclass.indexOf("<") + 1
+            if (genericStart > 0) {
+                val genericTypeStr = superclass.substring(genericStart, superclass.length - 1)
+
+                val genericTypeList = genericTypeStr.split(",")
+                for (generic in genericTypeList) {
+                    val genericClass = typeElement(generic)
+                    val extraList = LinkedList<ExtraInfo>()
+                    findExtra(genericClass, extraList)
+                    if (extraList.isNotEmpty()) {
+
+                    }
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            printWarn("processVM error")
+        }
+    }
+
+    private fun findExtra(clazz: Element, extraList: MutableList<ExtraInfo>) {
+        for (element in clazz.enclosedElements) {
+            val annotation = element.getAnnotation(Extra::class.java)
+            if (annotation != null) {
+                extraList.add(ExtraInfo(1, element))
+            }
+        }
+
+        val directSupertypes = mTypes.directSupertypes(clazz.asType())
+        findExtra(mTypes.asElement(directSupertypes[0]), extraList)
     }
 }
