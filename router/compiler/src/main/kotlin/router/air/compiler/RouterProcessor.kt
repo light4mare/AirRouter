@@ -116,7 +116,7 @@ class RouterProcessor : BaseProcessor() {
     }
 
     // ====================================================processVM====================================================
-    private fun processVM(annotatedElement: Element) {
+    private fun collectExtra(annotatedElement: Element, injectSet: MutableSet<Element>) {
         try {
             val className = annotatedElement.asType().toString()
             val typeElement = typeElement(className)
@@ -132,7 +132,7 @@ class RouterProcessor : BaseProcessor() {
                     val extraList = LinkedList<ExtraInfo>()
                     findExtra(genericClass, extraList)
                     if (extraList.isNotEmpty()) {
-
+                        injectSet.add(annotatedElement)
                     }
                 }
             }
@@ -151,5 +151,9 @@ class RouterProcessor : BaseProcessor() {
 
         val directSupertypes = mTypes.directSupertypes(clazz.asType())
         findExtra(mTypes.asElement(directSupertypes[0]), extraList)
+    }
+
+    private fun createInject(annotatedElement: Element, injectSet: MutableSet<Element>) {
+        annotatedElement.asType()
     }
 }
