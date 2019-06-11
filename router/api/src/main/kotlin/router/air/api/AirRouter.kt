@@ -16,8 +16,8 @@ object AirRouter {
         Router.loadRouteAndService()
     }
 
-    fun post(context: Context, uri: String) {
-        AirDrop(uri).post(context)
+    fun post(context: Any, uri: String, requestCode: Int = -1) {
+        AirDrop(uri).post(context, requestCode)
     }
 
     fun build(uri: String): AirDrop {

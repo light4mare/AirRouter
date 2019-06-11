@@ -15,12 +15,12 @@ import java.util.*
  */
 class AirDrop(private val uri: String) {
     private var extras = Bundle()
-    private var flags = 0
+    private var flags = -1
 
     private var track: AirTrack? = null
 
-    fun post(context: Context) {
-        Router.post(context, this, track)
+    fun post(context: Any, requestCode: Int = -1) {
+        Router.post(context, this, track, requestCode)
     }
 
     fun getUri(): String {

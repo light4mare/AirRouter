@@ -1,6 +1,7 @@
 package com.example.chat.impl
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.example.chatexport.ChatServiceApi
@@ -29,6 +30,11 @@ class ChatActivity : Activity() {
         AirRouter.getService(LoginService::class.java)?.let {
             Log.e("LoginService", "hasLogin: ${it.hasLogin()}")
         }
+
+        setResult(999, Intent().apply {
+            putExtra("result", "ChatActivity")
+        })
+        finish()
     }
 
     fun jumpLogin() {

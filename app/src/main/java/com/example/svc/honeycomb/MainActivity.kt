@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
 //        Route_chatserviceimpl.init()
 
         AirRouter.init()
-        AirRouter.post(this, "/chat/activity")
+        supportFragmentManager.beginTransaction().add(R.id.test_fragment, TestFragment()).commit()
+//        AirRouter.post(this, "/chat/activity")
     }
 }
